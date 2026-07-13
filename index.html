@@ -1,0 +1,1086 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Rental Radar</title><style>
+:root{
+  --paper:#f5f7f5;--card:#ffffff;--ink:#18201c;--muted:#5c6b62;--line:#e4e9e5;
+  --accent:#0f6b57;--accent-ink:#0b4e40;
+  --park-bg:#e2f2e7;--park-fg:#1c7a41;--parkw-bg:#eef5f0;--parkw-fg:#3f7a52;
+  --pet-bg:#fbedcc;--pet-fg:#8a5a12;--scam-bg:#fbe3e2;--scam-fg:#a3312b;
+  --new-bg:#e2ecfb;--new-fg:#1f5bb5;--chip-bg:#ecefec;--chip-fg:#48544d;
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:#0f1512;--card:#161d18;--ink:#e8efe9;--muted:#93a89b;--line:#26302a;
+  --accent:#43c39d;--accent-ink:#7fd8bb;
+  --park-bg:#173a26;--park-fg:#82dda1;--parkw-bg:#1b2c22;--parkw-fg:#8fc7a4;
+  --pet-bg:#3a2e12;--pet-fg:#e7c477;--scam-bg:#3a1f1f;--scam-fg:#f2a5a2;
+  --new-bg:#1a2a44;--new-fg:#a2c2f1;--chip-bg:#222a24;--chip-fg:#9fb0a5;
+}}
+:root[data-theme="light"]{
+  --paper:#f5f7f5;--card:#ffffff;--ink:#18201c;--muted:#5c6b62;--line:#e4e9e5;
+  --accent:#0f6b57;--accent-ink:#0b4e40;
+  --park-bg:#e2f2e7;--park-fg:#1c7a41;--parkw-bg:#eef5f0;--parkw-fg:#3f7a52;
+  --pet-bg:#fbedcc;--pet-fg:#8a5a12;--scam-bg:#fbe3e2;--scam-fg:#a3312b;
+  --new-bg:#e2ecfb;--new-fg:#1f5bb5;--chip-bg:#ecefec;--chip-fg:#48544d;
+}
+:root[data-theme="dark"]{
+  --paper:#0f1512;--card:#161d18;--ink:#e8efe9;--muted:#93a89b;--line:#26302a;
+  --accent:#43c39d;--accent-ink:#7fd8bb;
+  --park-bg:#173a26;--park-fg:#82dda1;--parkw-bg:#1b2c22;--parkw-fg:#8fc7a4;
+  --pet-bg:#3a2e12;--pet-fg:#e7c477;--scam-bg:#3a1f1f;--scam-fg:#f2a5a2;
+  --new-bg:#1a2a44;--new-fg:#a2c2f1;--chip-bg:#222a24;--chip-fg:#9fb0a5;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+a{color:var(--accent-ink)}
+.masthead{background:var(--card);border-bottom:1px solid var(--line);padding:20px clamp(16px,4vw,32px);position:sticky;top:0;z-index:10}
+.brand{display:flex;gap:14px;align-items:flex-start}
+.mark{font-size:30px;line-height:1}
+h1{margin:0;font-size:22px;letter-spacing:-.02em;text-wrap:balance}
+.tagline{margin:2px 0 0;color:var(--muted);font-size:13.5px;max-width:62ch}
+.stamp{margin:10px 0 0;color:var(--muted);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.statrow{display:flex;flex-wrap:wrap;gap:22px;margin:14px 0 4px}
+.stat{display:flex;flex-direction:column}
+.stat .sn{font-size:22px;font-weight:700;line-height:1}
+.stat .sl{font-size:12px;color:var(--muted)}
+.legend{margin:12px 0 0;font-size:13px;color:var(--muted);line-height:1.9}
+.legend strong{color:var(--ink)}
+.lg{padding:2px 8px;border-radius:20px;white-space:nowrap;font-size:12px}
+.lg.park{background:var(--park-bg);color:var(--park-fg)}
+.lg.pet{background:var(--pet-bg);color:var(--pet-fg)}
+.lg.scam{background:var(--scam-bg);color:var(--scam-fg)}
+.lg.new{background:var(--new-bg);color:var(--new-fg);font-weight:700}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg .city{border:0;border-right:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;cursor:pointer;font-size:13px}
+.seg .city:last-child{border-right:0}
+.seg .city.on{background:var(--accent);color:#fff}
+.field{font-size:13px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.field select,.field input{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.field input{width:84px}
+.toggle{padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer;font-size:13px}
+.toggle.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.showing{font-size:12px;color:var(--muted);margin-left:auto}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{max-width:1240px;margin:0 auto;padding:22px clamp(16px,4vw,32px);display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.ptop{display:flex;justify-content:space-between;align-items:baseline}
+.price .num{font-size:19px;font-weight:700}
+.price .per{color:var(--muted);font-size:12px;margin-left:2px}
+.score{font-size:12px;color:var(--muted);background:var(--chip-bg);border-radius:7px;padding:2px 8px}
+h3{margin:0;font-size:15.5px;line-height:1.35;text-wrap:balance}
+h3 a{color:var(--ink);text-decoration:none}
+h3 a:hover{color:var(--accent-ink);text-decoration:underline}
+.meta{margin:0;color:var(--muted);font-size:13px}
+.dates{color:var(--accent-ink)}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:11.5px;padding:2px 9px;border-radius:20px;background:var(--chip-bg);color:var(--chip-fg);white-space:nowrap}
+.pill.new{background:var(--new-bg);color:var(--new-fg);font-weight:700;letter-spacing:.03em}
+.pill.park{background:var(--park-bg);color:var(--park-fg)}
+.pill.parkw{background:var(--parkw-bg);color:var(--parkw-fg)}
+.pill.pet{background:var(--pet-bg);color:var(--pet-fg)}
+.pill.scam{background:var(--scam-bg);color:var(--scam-fg)}
+.crm{margin:0;font-size:12px;color:var(--muted)}
+details summary{cursor:pointer;font-size:13px;color:var(--accent-ink);width:fit-content}
+textarea{width:100%;height:132px;margin-top:8px;border:1px solid var(--line);border-radius:9px;padding:9px;
+  font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--paper);color:var(--ink);resize:vertical}
+.copy{margin-top:7px;padding:5px 13px;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:8px;cursor:pointer;font-size:13px}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:48px}
+footer{max-width:1240px;margin:0 auto;padding:8px clamp(16px,4vw,32px) 40px;color:var(--muted);font-size:13px}
+footer a{color:var(--accent-ink)}
+footer .dot{margin:0 8px;opacity:.5}
+.fine{font-size:12px;margin-top:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body><header class="masthead">
+  <div class="brand"><span class="mark">🏠</span><div><h1>Rental&nbsp;Radar</h1><p class="tagline">Fresh SF &amp; NYC rentals, swept twice a day — best matches (near a park, dog-friendly) first.</p></div></div>
+  <p class="stamp">Updated 2026-07-13 12:00:00Z</p>
+  <div class="statrow">
+    <div class="stat"><span class="sn">62</span><span class="sl">listings</span></div>
+    <div class="stat"><span class="sn">12</span><span class="sl">San Francisco</span></div>
+    <div class="stat"><span class="sn">50</span><span class="sl">New York</span></div>
+    <div class="stat"><span class="sn">5</span><span class="sl">🌳 near a park</span></div>
+    <div class="stat"><span class="sn">5</span><span class="sl">🐶 pet-friendly</span></div>
+  </div>
+  <p class="legend"><strong>How to read this:</strong> <span class="lg park">🌳 by a park</span> <span class="lg pet">🐶 pets welcome</span> <span class="lg scam">⚠ price looks too low — verify it's real</span> <span class="lg new">NEW = first time we've seen it</span>.</p>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="City">
+      <button class="city on" data-city="all">All</button>
+      <button class="city" data-city="SF">SF</button>
+      <button class="city" data-city="SF (nearby)">SF nearby</button>
+      <button class="city" data-city="NYC">NYC</button>
+    </div>
+    <label class="field">Size <select id="size"><option value="all">any</option><option>Studio</option><option>1BR</option><option>2BR</option></select></label>
+    <button class="toggle" id="parkOnly">🌳 park only</button>
+    <button class="toggle" id="petOnly">🐶 pets only</button>
+    <label class="field">Max&nbsp;$ <input id="maxPrice" type="number" value="4200" min="1000" max="4200" step="50"></label>
+    <span class="showing" id="showing"></span>
+  </div>
+</header>
+<main id="grid">
+<article class="card" data-city="SF" data-size="Studio" data-park="1" data-pet="0" data-price="3200">
+  <div class="ptop"><div class="price"><span class="num">$3,200</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">5</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-studio-apartment-in/7oRwDfhUwocjsVFjTDyWxd" target="_blank" rel="noopener">Studio Apartment in Presidio Heights</a></h3>
+  <p class="meta">laurel hts / presidio</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill park">🌳 by a park</span><span class="pill chip">SF</span><span class="pill chip">Studio</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your studio listing in laurel hts / presidio and it looks like a great fit.
+Being right by Presidio is a big draw for me.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="1" data-pet="0" data-price="2500">
+  <div class="ptop"><div class="price"><span class="num">$2,500</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">5</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-bedrooms-bath-fully-renovated/oJ5buixbi3eix9tyBDr1Hr" target="_blank" rel="noopener">2 bedrooms 1 bath fully renovated sunset park</a></h3>
+  <p class="meta">brooklyn</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill park">🌳 by a park</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in brooklyn and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="1" data-pet="1" data-price="3100">
+  <div class="ptop"><div class="price"><span class="num">$3,100</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">5</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-showing-today-blocks-to/rFsudiuPWvnoghTmBgP3wV" target="_blank" rel="noopener">SHOWING TODAY! BLOCKS TO PROSPECT PARK! STUNNING &amp; BRIGHT 1 BED ☀️</a></h3>
+  <p class="meta">Brooklyn</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill park">🌳 by a park</span><span class="pill pet">🐶 pets OK</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Brooklyn and it looks like a great fit.
+Being right by Prospect Park is a big draw for me.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="1" data-price="1875">
+  <div class="ptop"><div class="price"><span class="num">$1,875</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">3</span></div>
+  <h3><a href="https://www.listingsproject.com/listings/west-village-charmer-fully-stocked-1br-on-historic-street-w-rooftop-laundry-all-inclusive-pet-friendly-no-security-deposit-7e4bba06-5245-4aa9-b715-7220c74dbec3" target="_blank" rel="noopener">West Village Charmer: Fully Stocked 1BR On Historic Street w/ Rooftop, Laundry, All-Inclusive, Pet-Friendly, No Security Deposit</a></h3>
+  <p class="meta">The West Village, New York · <span class="dates">July 30, 2026 - October 31, 2026</span></p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill pet">🐶 pets OK</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in The West Village, New York and it looks like a great fit.
+Your dates (July 30, 2026 - October 31, 2026) line up well for me, and I'm flexible on timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="Studio" data-park="1" data-pet="1" data-price="3600">
+  <div class="ptop"><div class="price"><span class="num">$3,600</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">2</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-375-studio-by-barclays-tons-of/8hnwBqVwZmKP8H36KTwk3E" target="_blank" rel="noopener">375 🥰 STUDIO BY BARCLAYS TONS OF AMENITIES! 🥰</a></h3>
+  <p class="meta">Park Slope / Boerum Hill</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill parkw">🌳 park nearby?</span><span class="pill pet">🐶 pets OK</span><span class="pill chip">NYC</span><span class="pill chip">Studio</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your studio listing in Park Slope / Boerum Hill and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="1" data-pet="0" data-price="3400">
+  <div class="ptop"><div class="price"><span class="num">$3,400</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">2</span></div>
+  <h3><a href="https://www.listingsproject.com/listings/1-bedroom-prospect-heights-apartment-near-the-park-for-school-year-sublet-all-utilities-included-fully-furnished" target="_blank" rel="noopener">1 bedroom Prospect Heights apartment near the park for school-year sublet (all utilities included, fully furnished)</a></h3>
+  <p class="meta">Prospect Heights, Brooklyn · <span class="dates">August 1, 2026 - May 1, 2027</span></p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill park">🌳 by a park</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Prospect Heights, Brooklyn and it looks like a great fit.
+Being right by Prospect Park is a big draw for me.
+Your dates (August 1, 2026 - May 1, 2027) line up well for me, and I'm flexible on timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="SF" data-size="1BR" data-park="0" data-pet="0" data-price="1995">
+  <div class="ptop"><div class="price"><span class="num">$1,995</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-bd-1795-new-plank-floor/8Er8qdHsqGJ5yPx8LsKk3H" target="_blank" rel="noopener">1 BD $1,795-New Plank Floor in Great Location!</a></h3>
+  <p class="meta">nob hill</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">SF</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in nob hill and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="SF" data-size="Studio" data-park="0" data-pet="1" data-price="3320">
+  <div class="ptop"><div class="price"><span class="num">$3,320</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-tmlp-13-mo-impeccable/7WqSzWnizVFmMxtw2iEmXN" target="_blank" rel="noopener">TMLP 13-mo. | Impeccable Studio-Upgraded Features + Waterfall Oasis Retreat</a></h3>
+  <p class="meta">western addition</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill pet">🐶 pets OK</span><span class="pill chip">SF</span><span class="pill chip">Studio</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your studio listing in western addition and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="SF" data-size="2BR" data-park="0" data-pet="0" data-price="3200">
+  <div class="ptop"><div class="price"><span class="num">$3,200</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-bedroom-conveniently-near/v6iUGfdUo141u5Zmiqyumw" target="_blank" rel="noopener">2-bedroom conveniently near Taraval</a></h3>
+  <p class="meta">sunset / parkside</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">SF</span><span class="pill chip">2BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in sunset / parkside and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="SF" data-size="1BR" data-park="0" data-pet="0" data-price="3300">
+  <div class="ptop"><div class="price"><span class="num">$3,300</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-huge-one-bedroom/qufSKdLS6MWQUuC5FoqUKG" target="_blank" rel="noopener">Huge One Bedroom</a></h3>
+  <p class="meta">russian hill</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">SF</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in russian hill and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="SF" data-size="1BR" data-park="0" data-pet="0" data-price="4095">
+  <div class="ptop"><div class="price"><span class="num">$4,095</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-spacious-twin-peaks-one/omQuPtNJCpqvFrqp9TJS5A" target="_blank" rel="noopener">Spacious Twin Peaks One Bedroom w/ Private View Deck, Laundry On-Site,</a></h3>
+  <p class="meta">twin peaks / diamond hts</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">SF</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in twin peaks / diamond hts and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="SF" data-size="1BR" data-park="0" data-pet="1" data-price="3914">
+  <div class="ptop"><div class="price"><span class="num">$3,914</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-impeccable-br-upgraded/5xTbnbKvE1sn4zFdHEUve9" target="_blank" rel="noopener">Impeccable 1 BR-Upgraded Features + Waterfall Oasis Retreat</a></h3>
+  <p class="meta">western addition</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill pet">🐶 pets OK</span><span class="pill chip">SF</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in western addition and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="SF" data-size="1BR" data-park="0" data-pet="0" data-price="4082">
+  <div class="ptop"><div class="price"><span class="num">$4,082</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-sunset-city-views/4WhGUTv1e4GDLBdSWC8U2n" target="_blank" rel="noopener">Sunset City Views-Stunning Upgraded 1 BR, Tour Now!</a></h3>
+  <p class="meta">western addition</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">SF</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in western addition and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="SF" data-size="1BR" data-park="0" data-pet="0" data-price="3852">
+  <div class="ptop"><div class="price"><span class="num">$3,852</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-weeks-free-14th-flrjunior/71mxDzWEZVRoCfy1wbuSsX" target="_blank" rel="noopener">2 WEEKS FREE! 14th Flr*Junior 1Bedroom*In-Unit W/D</a></h3>
+  <p class="meta">hayes valley</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">SF</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in hayes valley and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="SF" data-size="1BR" data-park="0" data-pet="0" data-price="4001">
+  <div class="ptop"><div class="price"><span class="num">$4,001</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-weeks-free-6th-flr1bed/eUjkMfJQ41EFHi3PqZyNBR" target="_blank" rel="noopener">2 WEEKS FREE! 6th Flr*1Bed/1Bath*Balcony &amp; Walk-in Closet</a></h3>
+  <p class="meta">hayes valley</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">SF</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in hayes valley and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="SF" data-size="Studio" data-park="0" data-pet="0" data-price="2300">
+  <div class="ptop"><div class="price"><span class="num">$2,300</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-charming-cole-valley/j8CdFGCUxdF9K5VgrKXqgM" target="_blank" rel="noopener">Charming Cole Valley Studio</a></h3>
+  <p class="meta">cole valley / ashbury hts</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">SF</span><span class="pill chip">Studio</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your studio listing in cole valley / ashbury hts and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="SF" data-size="Studio" data-park="0" data-pet="0" data-price="3536">
+  <div class="ptop"><div class="price"><span class="num">$3,536</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/san-francisco-captivating-cityscape/w2wJvyWjvJoyHHX2Kf26hj" target="_blank" rel="noopener">Captivating Cityscape Studio-Keyless Entry &amp; Luxe Finishes</a></h3>
+  <p class="meta">financial district</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">SF</span><span class="pill chip">Studio</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your studio listing in financial district and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="1700">
+  <div class="ptop"><div class="price"><span class="num">$1,700</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/staten-island-bedroom-apartment/6CtEePZrjuDMAcrCVZiHNG" target="_blank" rel="noopener">1 Bedroom Apartment available for Rent</a></h3>
+  <p class="meta">Prince's Bay</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Prince's Bay and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2100">
+  <div class="ptop"><div class="price"><span class="num">$2,100</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/maspeth-one-bedroom-garden-apartment/6T5y1Wuu4H6Di7tPbsKqxS" target="_blank" rel="noopener">One bedroom garden apartment</a></h3>
+  <p class="meta">Ridgewood</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Ridgewood and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="Studio" data-park="0" data-pet="0" data-price="1650">
+  <div class="ptop"><div class="price"><span class="num">$1,650</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/astoria-studio/3KSJkq3Cd3coBaEEDWD4aB" target="_blank" rel="noopener">Studio</a></h3>
+  <p class="meta">Astoria</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">Studio</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your studio listing in Astoria and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="1600">
+  <div class="ptop"><div class="price"><span class="num">$1,600</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/elizabeth-bed-bath-apartment-in/bj3ez7Xv9uH3b92igb8Eqb" target="_blank" rel="noopener">1 Bed 1 Bath Apartment in Elizabeth New Jersey</a></h3>
+  <p class="meta">Elizabeth</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Elizabeth and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2300">
+  <div class="ptop"><div class="price"><span class="num">$2,300</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/astoria-bedroom-astoria/iryysKMqJCDFr4kSqFyPLg" target="_blank" rel="noopener">1 bedroom astoria</a></h3>
+  <p class="meta">Astoria</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Astoria and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="0" data-pet="0" data-price="3350">
+  <div class="ptop"><div class="price"><span class="num">$3,350</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/astoria-bed-astoria/17KXJCwxuJ7CkTpEvkmNfi" target="_blank" rel="noopener">2 bed astoria</a></h3>
+  <p class="meta">Astoria</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in Astoria and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2626">
+  <div class="ptop"><div class="price"><span class="num">$2,626</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/bronx-bedroom-for-hasa/uJazK1jGZdNmVU2ThREu54" target="_blank" rel="noopener">1 bedroom for Hasa</a></h3>
+  <p class="meta">Bronx</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Bronx and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="1700">
+  <div class="ptop"><div class="price"><span class="num">$1,700</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/stratford-great-stratford-bedroom/uE9bjWV9TRfcxx7hPBrJq3" target="_blank" rel="noopener">Great Stratford 1 Bedroom Apartment!</a></h3>
+  <p class="meta">fairfield co, CT</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in fairfield co, CT and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="Studio" data-park="0" data-pet="0" data-price="3000">
+  <div class="ptop"><div class="price"><span class="num">$3,000</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-the-studio-delight/ths3DtSGDwmaUkh4bNA9En" target="_blank" rel="noopener">THE STUDIO DELIGHT</a></h3>
+  <p class="meta">FORT GREENE</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">Studio</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your studio listing in FORT GREENE and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="0" data-pet="0" data-price="2000">
+  <div class="ptop"><div class="price"><span class="num">$2,000</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/bronx-renovated-2bed-all-utilities/6XhqP62YTDLvQKCJcS83em" target="_blank" rel="noopener">Renovated 2bed ALL UTILITIES INCLUDED, LAUNDRY/backyard</a></h3>
+  <p class="meta">Mosholu av</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in Mosholu av and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="1650">
+  <div class="ptop"><div class="price"><span class="num">$1,650</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/bronx-budget-friendly-bright-bedroom/pRVfovmhYJTAuhbBrP7eGW" target="_blank" rel="noopener">Budget-Friendly Bright 1-Bedroom Apartment for Rent</a></h3>
+  <p class="meta">Bronx</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Bronx and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="0" data-pet="0" data-price="2000">
+  <div class="ptop"><div class="price"><span class="num">$2,000</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/corona-spacious-bedroom-basement/vNaP2GMdgjAjrgBnRwpysR" target="_blank" rel="noopener">Spacious 2-Bedroom Basement Apartment with Backyard Access &amp; ALL Utili</a></h3>
+  <p class="meta">Corona,Queens</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in Corona,Queens and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="Studio" data-park="0" data-pet="0" data-price="1922">
+  <div class="ptop"><div class="price"><span class="num">$1,922</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/new-york-beautiful-rent-stabilized/7w3QgU3wUZDgh9BMEX9oo8" target="_blank" rel="noopener">Beautiful rent stabilized studio! Ground unit!</a></h3>
+  <p class="meta">Harlem / Morningside</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">Studio</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your studio listing in Harlem / Morningside and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="0" data-pet="0" data-price="2100">
+  <div class="ptop"><div class="price"><span class="num">$2,100</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/elmhurst-move-in-ready-2br-apartment/6m7kf1q2MGi9YgE9tbTLZz" target="_blank" rel="noopener">Move-In Ready 2BR Apartment with On-Site Laundry College Point $2,100</a></h3>
+  <p class="meta">College Point</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in College Point and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2150">
+  <div class="ptop"><div class="price"><span class="num">$2,150</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/kew-gardens-large-bright-1br-on-talbot/fAj2jH15Bs63LN3uqHr4tN" target="_blank" rel="noopener">Large, bright 1BR on Talbot Street in Kew Gardens!</a></h3>
+  <p class="meta">Kew Gardens</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Kew Gardens and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="1800">
+  <div class="ptop"><div class="price"><span class="num">$1,800</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/flushing-bedroom-apartment-for-rent/wneMM646V1K1Cp9jGStkkn" target="_blank" rel="noopener">1 Bedroom Apartment for Rent</a></h3>
+  <p class="meta">Flushing</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Flushing and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="0" data-pet="0" data-price="3400">
+  <div class="ptop"><div class="price"><span class="num">$3,400</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-sun-drenched-king-size/ud776PsCXy8adw7iWMhvBF" target="_blank" rel="noopener">SUN DRENCHED KING SIZE 2 BED!LAUNDRY IN UNIT!PRIVATE BACKYARD!</a></h3>
+  <p class="meta">Bushwick</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in Bushwick and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2650">
+  <div class="ptop"><div class="price"><span class="num">$2,650</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-br-washer-dryer-and-balcony/mTL7wq2P1aH5Zx8DMVBpbX" target="_blank" rel="noopener">1525 😎 1 BR W/ WASHER DRYER AND BALCONY 😎</a></h3>
+  <p class="meta">Crown Heights</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Crown Heights and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="3400">
+  <div class="ptop"><div class="price"><span class="num">$3,400</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-420-spacious-br-office-private/2BrhQ3aHp9AXiG4kcXqxhy" target="_blank" rel="noopener">420 👑 SPACIOUS 1 BR + OFFICE W/ PRIVATE YARD! 👑</a></h3>
+  <p class="meta">East Williamsburg / Bushwick</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in East Williamsburg / Bushwick and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="Studio" data-park="0" data-pet="0" data-price="2857">
+  <div class="ptop"><div class="price"><span class="num">$2,857</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-studio-prime-prospect-heights/tGupUQynZoPb8ime41EBqq" target="_blank" rel="noopener">Studio – Prime Prospect Heights Location – $2,857</a></h3>
+  <p class="meta">Prospect Heights</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">Studio</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your studio listing in Prospect Heights and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2100">
+  <div class="ptop"><div class="price"><span class="num">$2,100</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-br-spacious-bedroom-in/uTqppb22VUqz6TbYh5gASh" target="_blank" rel="noopener">$2,100 / 1br - Spacious 1-Bedroom in Elevator Building with Laundry (B</a></h3>
+  <p class="meta">Flatbush</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Flatbush and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="Studio" data-park="0" data-pet="0" data-price="1900">
+  <div class="ptop"><div class="price"><span class="num">$1,900</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-1900-studio-bright-studio/p13SyAF1cwbB7RsfkLjBGS" target="_blank" rel="noopener">$1,900 / Studio - Bright Studio Apartment in Elevator Building with La</a></h3>
+  <p class="meta">Flatbush</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">Studio</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your studio listing in Flatbush and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2450">
+  <div class="ptop"><div class="price"><span class="num">$2,450</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-massive-bed-in-prime-crown/rMgaD5fvSarXJ2vnxR4isn" target="_blank" rel="noopener">MASSIVE 1 Bed IN PRIME CROWN HEIGHTS! 5 M WALK To The 3-4-2-5 train</a></h3>
+  <p class="meta">brooklyn</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in brooklyn and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="0" data-pet="0" data-price="2950">
+  <div class="ptop"><div class="price"><span class="num">$2,950</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/staten-island-bedroom-apartment-for-rent/uQcv5QJd9iz3m9gw9n8Nw8" target="_blank" rel="noopener">2 BEDROOM APARTMENT FOR RENT</a></h3>
+  <p class="meta">New Dorp, Staten Island</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in New Dorp, Staten Island and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="0" data-pet="0" data-price="2500">
+  <div class="ptop"><div class="price"><span class="num">$2,500</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/flushing-flushing-two-bedrooms/a75MMY31EG9pAK1tgyAKdX" target="_blank" rel="noopener">Flushing Two Bedrooms</a></h3>
+  <p class="meta">Flushing</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in Flushing and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2600">
+  <div class="ptop"><div class="price"><span class="num">$2,600</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/sunnyside-beautiful-bedroom-apartment/1KsiEJS2PQUJpeBxNGfUMV" target="_blank" rel="noopener">Beautiful 1 Bedroom Apartment for Rent in Co-op Building in SUNNYSIDE!</a></h3>
+  <p class="meta">Sunnyside</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Sunnyside and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="0" data-pet="0" data-price="2500">
+  <div class="ptop"><div class="price"><span class="num">$2,500</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/woodside-rent-apartment-br/qE1YVhKagE6gW6m2BGzsuV" target="_blank" rel="noopener">Rent Apartment 2 BR</a></h3>
+  <p class="meta">WOODSIDE</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in WOODSIDE and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="0" data-pet="0" data-price="2500">
+  <div class="ptop"><div class="price"><span class="num">$2,500</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/woodside-rent-apartment-br/eivmJXu91T1NfuupvYkYwt" target="_blank" rel="noopener">RENT APARTMENT 2 BR</a></h3>
+  <p class="meta">WOODSIDE</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in WOODSIDE and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2500">
+  <div class="ptop"><div class="price"><span class="num">$2,500</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/astoria-one-bedroom-prime-location/bH3srAg8e1J53RhmRuRX3y" target="_blank" rel="noopener">ONE BEDROOM - PRIME LOCATION</a></h3>
+  <p class="meta">Astoria</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">rental</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Astoria and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="1300">
+  <div class="ptop"><div class="price"><span class="num">$1,300</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/new-york-exceedingly-large-one-bedroom/eXWAnvD1cxmGfMF3zksGJA" target="_blank" rel="noopener">Exceedingly large one bedroom summer sublet July,August and Sept.</a></h3>
+  <p class="meta">Chinatown / Lit Italy</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Chinatown / Lit Italy and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2500">
+  <div class="ptop"><div class="price"><span class="num">$2,500</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-one-bedroom-sublet-in/orVRFYTU44CrTzCVVLBqnT" target="_blank" rel="noopener">One bedroom Sublet in Greenpoint / July and half of August</a></h3>
+  <p class="meta">Greenpoint</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Greenpoint and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2500">
+  <div class="ptop"><div class="price"><span class="num">$2,500</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-1br-sublet-in-midtown-east/vcjS8Tvf8eva2tZwyapgsw" target="_blank" rel="noopener">1BR Sublet in Midtown East / July and half of August</a></h3>
+  <p class="meta">Midtown East</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Midtown East and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2500">
+  <div class="ptop"><div class="price"><span class="num">$2,500</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/new-york-sunlight-scale-private-balcony/imYUrj9V24GWYxYozoYjj5" target="_blank" rel="noopener">Sunlight, scale, private balcony + Beautiful 1BR/1BA!!!</a></h3>
+  <p class="meta">Flatiron</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Flatiron and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="1650">
+  <div class="ptop"><div class="price"><span class="num">$1,650</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/brooklyn-furnished-1br-apt-to-yourself/6pb4hxMpS6d3h1CALAvTRS" target="_blank" rel="noopener">Furnished 1BR apt to yourself, 2-week sublet avail 7/20</a></h3>
+  <p class="meta">Greenpoint, Brooklyn</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Greenpoint, Brooklyn and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="1375">
+  <div class="ptop"><div class="price"><span class="num">$1,375</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.listingsproject.com/listings/prime-greenpoint-1-bed-2-bath-b19c7ff8-51d5-402d-b949-01206cbc349b" target="_blank" rel="noopener">Prime Greenpoint 1 Bed/2 Bath</a></h3>
+  <p class="meta">Greenpoint, BROOKLYN · <span class="dates">July 12, 2026 - July 24, 2026</span></p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Greenpoint, BROOKLYN and it looks like a great fit.
+Your dates (July 12, 2026 - July 24, 2026) line up well for me, and I'm flexible on timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2695">
+  <div class="ptop"><div class="price"><span class="num">$2,695</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.listingsproject.com/listings/modern-1-br-1-ba-wfh-sublet-in-crown-heights-available-august-1st-september-30-flexible-to-october-10-c5d8dade-7b54-4ef7-8df3-10df4175d40a" target="_blank" rel="noopener">Modern 1 br / 1 ba WFH Sublet in Crown Heights - Available August 1st – September 30 (flexible to October 10)</a></h3>
+  <p class="meta">Crown Heights, Brooklyn · <span class="dates">August 1, 2026 - September 30, 2026</span></p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Crown Heights, Brooklyn and it looks like a great fit.
+Your dates (August 1, 2026 - September 30, 2026) line up well for me, and I'm flexible on timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="0" data-pet="0" data-price="2800">
+  <div class="ptop"><div class="price"><span class="num">$2,800</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.listingsproject.com/listings/bright-bed-stuy-top-floor-1-2-br-apt-with-outdoor-space" target="_blank" rel="noopener">Bright Bed-Stuy Top Floor 1-2 BR Apt with Outdoor Space</a></h3>
+  <p class="meta">Bedford-Stuyvesant, Brooklyn · <span class="dates">August 10, 2026 - August 31, 2026</span></p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in Bedford-Stuyvesant, Brooklyn and it looks like a great fit.
+Your dates (August 10, 2026 - August 31, 2026) line up well for me, and I'm flexible on timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="2970">
+  <div class="ptop"><div class="price"><span class="num">$2,970</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.listingsproject.com/listings/1br-work-from-home-furnished-quiet-yard-facing-24bce906-0807-4e4f-bede-67270aa19f42" target="_blank" rel="noopener">1BR - WORK FROM HOME - Furnished, quiet, yard-facing</a></h3>
+  <p class="meta">Prospect Lefferts Gardens, Brooklyn · <span class="dates">August 1, 2026 - October 1, 2026</span></p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Prospect Lefferts Gardens, Brooklyn and it looks like a great fit.
+Your dates (August 1, 2026 - October 1, 2026) line up well for me, and I'm flexible on timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="3500">
+  <div class="ptop"><div class="price"><span class="num">$3,500</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.listingsproject.com/listings/sun-soaked-carroll-gardens-one-bedroom-dbb7fab9-7639-4089-8815-18869d150f12" target="_blank" rel="noopener">Sun-soaked Carroll Gardens One Bedroom</a></h3>
+  <p class="meta">Carroll Gardens, Brooklyn · <span class="dates">August 12, 2026 - August 15, 2027</span></p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Carroll Gardens, Brooklyn and it looks like a great fit.
+Your dates (August 12, 2026 - August 15, 2027) line up well for me, and I'm flexible on timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="1995">
+  <div class="ptop"><div class="price"><span class="num">$1,995</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.listingsproject.com/listings/beautiful-1-bedroom-apartment-in-crown-heights-furnished" target="_blank" rel="noopener">Beautiful 1-bedroom apartment in Crown Heights (Furnished)</a></h3>
+  <p class="meta">Crown Heights, brooklyn · <span class="dates">July 24, 2026 - August 31, 2026</span></p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Crown Heights, brooklyn and it looks like a great fit.
+Your dates (July 24, 2026 - August 31, 2026) line up well for me, and I'm flexible on timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="3550">
+  <div class="ptop"><div class="price"><span class="num">$3,550</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.listingsproject.com/listings/sunny-1-bedroom-apartment-near-city-college-and-columbia-university-003de07b-4fdf-4fef-898a-508924d5d9cc" target="_blank" rel="noopener">Sunny 1 Bedroom Apartment near City College and Columbia University</a></h3>
+  <p class="meta">West Harlem, New York · <span class="dates">August 1, 2026 - December 31, 2026</span></p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in West Harlem, New York and it looks like a great fit.
+Your dates (August 1, 2026 - December 31, 2026) line up well for me, and I'm flexible on timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="3600">
+  <div class="ptop"><div class="price"><span class="num">$3,600</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">1</span></div>
+  <h3><a href="https://www.listingsproject.com/listings/cozy-and-sunny-1-bedroom-apartment-b3ca13ea-053c-4c62-9c35-26d68a935fd0" target="_blank" rel="noopener">Cozy and Sunny 1 bedroom apartment</a></h3>
+  <p class="meta">Clinton hill/ BedStuy, Brooklyn · <span class="dates">July 13, 2026 - September 30, 2026</span></p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Clinton hill/ BedStuy, Brooklyn and it looks like a great fit.
+Your dates (July 13, 2026 - September 30, 2026) line up well for me, and I'm flexible on timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="1475">
+  <div class="ptop"><div class="price"><span class="num">$1,475</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">-2</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/new-york-exceedingly-large-one-bedroom/5wiBWRFU9hVTt9XTeyehLx" target="_blank" rel="noopener">Exceedingly large one bedroom summer sublet July,August and Sept.</a></h3>
+  <p class="meta">Greenwich Village</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill scam">⚠ check price</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Greenwich Village and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="1BR" data-park="0" data-pet="0" data-price="1475">
+  <div class="ptop"><div class="price"><span class="num">$1,475</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">-2</span></div>
+  <h3><a href="https://www.craigslist.org/view/d/new-york-exceedingly-large-one-bedroom/u8zBJFqTRs7Jqrc4Gv3RZJ" target="_blank" rel="noopener">Exceedingly large one bedroom summer sublet July,August and Sept.</a></h3>
+  <p class="meta">Greenwich Village</p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill scam">⚠ check price</span><span class="pill chip">NYC</span><span class="pill chip">1BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 1-bedroom listing in Greenwich Village and it looks like a great fit.
+I'm flexible on move-in timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+<article class="card" data-city="NYC" data-size="2BR" data-park="0" data-pet="0" data-price="1000">
+  <div class="ptop"><div class="price"><span class="num">$1,000</span><span class="per">/mo</span></div><span class="score" title="match score — parks & pets rank higher">-2</span></div>
+  <h3><a href="https://www.listingsproject.com/listings/bright-and-spacious-2-bed-sublet-in-lower-east-side-chinatown-available-from-august-16" target="_blank" rel="noopener">Bright and spacious 2 bed sublet in Lower East Side/Chinatown available from August 16</a></h3>
+  <p class="meta">Lower East Side/Chinatown, Manhattan · <span class="dates">August 16, 2026 - September 27, 2026</span></p>
+  <div class="pills"><span class="pill new">NEW</span><span class="pill scam">⚠ check price</span><span class="pill chip">NYC</span><span class="pill chip">2BR</span><span class="pill chip">sublet</span></div>
+  <p class="crm">Status: <strong>New</strong></p>
+  <details><summary>Copy a message to the lister</summary>
+    <textarea readonly onclick="this.select()">Hi — I came across your 2-bedroom listing in Lower East Side/Chinatown, Manhattan and it looks like a great fit.
+Your dates (August 16, 2026 - September 27, 2026) line up well for me, and I'm flexible on timing.
+I have references ready and can move quickly — I'd love to set up a time to see it. Thanks so much!
+
+— Yatú</textarea>
+    <button type="button" class="copy" onclick="const t=this.previousElementSibling;t.select();navigator.clipboard&&navigator.clipboard.writeText(t.value);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </details>
+</article>
+</main>
+<footer>
+  <p><strong>Browse more by hand</strong> (these aren't swept automatically): <a href="https://www.facebook.com/marketplace/sanfrancisco/propertyrentals?minPrice=1000&amp;maxPrice=4200" target="_blank" rel="noopener">FB Marketplace — SF</a><span class="dot">·</span><a href="https://www.facebook.com/marketplace/nyc/propertyrentals?minPrice=1000&amp;maxPrice=4200" target="_blank" rel="noopener">FB Marketplace — NYC</a><span class="dot">·</span><a href="https://www.leasebreak.com/short-term-rentals/new-york" target="_blank" rel="noopener">Leasebreak — NYC short-term</a></p>
+  <p class="fine">Rental Radar keeps your human-edited CRM rows untouched — it only adds new finds with status “New”.</p>
+</footer><script>
+(function(){
+  var state={city:'all',size:'all',park:false,pet:false,maxPrice:4200};
+  var cards=[].slice.call(document.querySelectorAll('.card'));
+  var showing=document.getElementById('showing');
+  function apply(){
+    var vis=0;
+    cards.forEach(function(c){
+      var p=c.dataset.price===''?0:+c.dataset.price;
+      var ok=(state.city==='all'||c.dataset.city===state.city)
+        &&(state.size==='all'||c.dataset.size===state.size)
+        &&(!state.park||c.dataset.park==='1')
+        &&(!state.pet||c.dataset.pet==='1')
+        &&(p<=state.maxPrice);
+      c.style.display=ok?'':'none'; if(ok)vis++;
+    });
+    if(showing)showing.textContent='showing '+vis+' of '+cards.length;
+  }
+  document.querySelectorAll('.city').forEach(function(b){b.onclick=function(){
+    document.querySelectorAll('.city').forEach(function(x){x.classList.remove('on')});
+    b.classList.add('on');state.city=b.dataset.city;apply();};});
+  document.getElementById('size').onchange=function(e){state.size=e.target.value;apply();};
+  document.getElementById('parkOnly').onclick=function(e){state.park=!state.park;e.target.classList.toggle('on');apply();};
+  document.getElementById('petOnly').onclick=function(e){state.pet=!state.pet;e.target.classList.toggle('on');apply();};
+  document.getElementById('maxPrice').oninput=function(e){state.maxPrice=+e.target.value||4200;apply();};
+  apply();
+})();
+</script></body></html>
